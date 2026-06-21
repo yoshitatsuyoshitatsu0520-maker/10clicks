@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>10回クリック</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
+body{
+
+margin:0;
+
+background-color:#3a3a3a;
+
+background-image:
+
+linear-gradient(
+rgba(255,255,255,0.15) 1px,
+transparent 1px),
+
+linear-gradient(
+90deg,
+rgba(255,255,255,0.15) 1px,
+transparent 1px);
+
+background-size:20px 20px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+height:100vh;
+
+overflow:hidden;
+
+color:#00ff88;
+
+font-family:
+'DotGothic16',
+sans-serif;
+
+}
+
+#game{
+
+width:500px;
+
+height:800px;
+
+background:#1a1a1a;
+
+position:relative;
+
+overflow:hidden;
+
+
+text-align:center;
+
+}
+
+
+
+h1{
+
+margin-top:70px;
+
+font-size:45px;
+
+}
+
+
+
+#count{
+
+font-size:35px;
+
+margin-top:60px;
+
+}
+
+
+
+#btn{
+
+margin-top:40px;
+
+width:250px;
+
+height:90px;
+
+font-size:35px;
+
+background:#1a1a1a;
+
+color:#00ff88;
+
+border:
+
+4px solid #00ff88;
+
+font-family:
+'DotGothic16',
+sans-serif;
+
+cursor:pointer;
+
+transition:0.3s;
+
+}
+
+
+
+#secret{
+
+opacity:0;
+
+margin-top:40px;
+
+font-size:20px;
+
+transition:2s;
+
+color: black;
+
+}
+.horror-text {
+  position: absolute;
+  color: red;
+  font-size: 24px;
+  font-family: 'DotGothic16', sans-serif;
+  pointer-events: none;
+  animation: fadeOut 2s forwards;
+}
+
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(1px, 1px); }
+  
+  
+}
+
+
+
+#character{
+
+position:absolute;
+
+left:50%;
+
+bottom:40px;
+
+transform:translateX(-50%);
+
+text-align:center;
+
+}
+
+
+#gif{
+
+width:250px;
+
+height:auto;
+
+display:block;
+
+margin:auto;
+
+image-rendering:pixelated;
+
+}
+
+#speech{
+
+position:relative;
+
+background:white;
+
+color:black;
+
+border:5px solid black;
+
+padding:15px 25px;
+
+display:inline-block;
+
+margin-bottom:20px;
+
+font-size:25px;
+
+top:35px;
+
+}
+
+
+
+#speech::after{
+
+content:"";
+
+position:absolute;
+
+bottom:-28px;
+
+left:50%;
+
+transform:translateX(-50%);
+
+border:15px solid transparent;
+
+border-top:15px solid white;
+
+}
+
+#speech.red::after{
+
+border:15px solid transparent;
+
+border-top-color:#000;
+
+}
+
+.glitch{
+
+animation:glitch 0.2s infinite;
+
+}
+
+#reset{
+
+position:absolute;
+
+left:20px;
+
+bottom:20px;
+
+width:100px;
+
+height:50px;
+
+background:#1a1a1a;
+
+color:#00ff88;
+
+border:3px solid #00ff88;
+
+font-family:'DotGothic16',sans-serif;
+
+cursor:pointer;
+
+}
+
+#btn:hover{
+
+background:#00ff88;
+
+color:#111;
+
+transform:scale(1.05);
+
+}
+
+.red:hover{
+
+background:#ff0000;
+
+color:#000;
+
+}
+
+@keyframes glitch{
+
+0%{transform:translateX(0);}
+
+25%{transform:translateX(-5px);}
+
+50%{transform:translateX(5px);}
+
+75%{transform:translateY(-3px);}
+
+100%{transform:translateX(0);}
+
+}
+
+#horrorContainer{
+
+position:absolute;
+
+top:0;
+
+left:0;
+
+width:100%;
+
+height:100%;
+
+pointer-events:none;
+
+}
+
+.horror{
+
+position:absolute;
+
+width:120px;
+
+opacity:1;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="game">
+
+<h1 id="title">
+
+10回ボタン押して
+
+</h1>
+
+<audio
+id="bgm"
+src="retrogamecenter.mp3"
+loop>
+</audio>
+
+
+<p id="count">
+
+押した回数:0回
+
+</p>
+
+
+
+<button id="btn">
+
+クリック！
+
+</button>
+
+<audio
+id="clickSound"
+src="botan.mp3">
+</audio>
+
+<audio
+id="specialSound"
+src="kuria.mp3">
+</audio>
+
+<div id="secret">
+
+たすけて
+
+</div>
+
+<button id="reset">
+
+０に戻す
+
+</button>
+
+
+<div id="character">
+
+<div id="speech">
+
+にゃん！
+
+</div>
+
+
+<img
+id="gif"
+src="roloa.gif">
+
+</div>
+
+</div>
+
+<div id="horrorContainer">
+
+</div>
+
+<script>
+
+const bgm = document.getElementById("bgm");
+const clickSound = document.getElementById("clickSound");
+const specialSound = document.getElementById("specialSound");
+
+let click = 0;
+
+const title = document.getElementById("title");
+const count = document.getElementById("count");
+const btn = document.getElementById("btn");
+const secret = document.getElementById("secret");
+const speech = document.getElementById("speech");
+const gif = document.getElementById("gif");
+
+const game = document.getElementById("game");
+const reset = document.getElementById("reset");
+const container = document.getElementById("horrorContainer");
+
+count.textContent = `押した回数:${click}回`;
+
+btn.onclick = () => {
+
+  // クリック音
+  clickSound.currentTime = 0;
+  clickSound.play();
+
+  click++;
+  localStorage.setItem("click", click);
+
+  count.textContent = `押した回数:${click}回`;
+
+  // BGM開始（最初だけ）
+  if (click == 1) {
+    bgm.src = "retrogamecenter.mp3";
+    bgm.play();
+  }
+
+  if(click==5){ speech.textContent= "ポチポチにゃ～"; } 
+  
+  if(click==10){ specialSound.currentTime=0; specialSound.play(); speech.textContent= "ありがとにゃん♪"; }
+  
+  if(click==15){ speech.textContent= "にゃ！？"; } if(click==20){ speech.textContent= "もう押さなくていいにゃ～！"; } 
+  
+  if(click==30){ speech.textContent= "お前言葉通じるにゃ？"; } 
+  
+  if(click==40){ title.style.color="#ff0000"; title.textContent= "どうして";
+  setTimeout(()=>{ title.style.color="#00ff88"; title.textContent= "１０回ボタン押して"; },100); } 
+
+  if(click==50){ speech.textContent= "ボクの言うことが聞けないのかにゃ？"; secret.style.opacity=1; } 
+  
+  if(click==60){ speech.textContent= "………"; } if(click==70){ speech.textContent= "アイツを思い出す"; } 
+  
+  if(click==80){ speech.textContent= "やめてくれなかった、あの日"; } if(click==90){ speech.textContent= "許せない"; }
+
+  // 100回で完全停止
+  if (click == 100) {
+    bgm.pause();
+    bgm.currentTime = 0;
+
+    title.textContent = "やめろ";
+    btn.textContent = "押すな";
+    speech.textContent = "　　　　";
+
+    game.style.background = "#ff0000";
+    gif.src = "roloa2.gif";
+
+    title.style.color = "#000";
+    count.style.color = "#000";
+
+    speech.style.color = "#ff0000";
+    speech.style.background = "#000";
+    speech.style.borderColor = "#000";
+
+    btn.style.background = "#000";
+    btn.style.borderColor = "#000";
+    btn.style.color = "#ff0000";
+
+    reset.style.background = "#000";
+    reset.style.borderColor = "#000";
+    reset.style.color = "#ff0000";
+
+    btn.classList.add("red");
+    speech.classList.add("red");
+
+    document.title = "?";
+  }
+
+  // 110回
+  if (click == 110) {
+
+    bgm.pause();
+    bgm.src = "fukakukuraiido.mp3";
+    bgm.currentTime = 0;
+    bgm.play();
+
+    speech.textContent = "くぁｗせｄｒｆｔｇｙふじこｌｐ";
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < 20; i++) {
+      const img = document.createElement("img");
+
+      img.src = "me.jfif";
+      img.className = "horror";
+
+      img.style.left = Math.random() * 2000 + "px";
+      img.style.top = Math.random() * 680 + "px";
+
+      container.appendChild(img);
+    }
+  }
+
+  // 150
+  if (click == 130) {
+    title.textContent = "豸吶→蠕ｩ隶?";
+    speech.textContent = "";
+
+  const messages = [
+    "關ｽ縺｡縺薙⊂繧?",
+    "谿ｺ縺励※",
+    "險ｱ縺輔↑縺?ｨｱ縺輔↑縺?ｨｱ縺輔↑縺?ｨｱ縺輔↑縺?ｨｱ縺輔↑縺?ｨｱ縺輔↑縺?",
+    "蜒輔?縺昴％縺ｫ縺?ｋ",
+    "謌ｻ繧後↑縺?"
+  ];
+
+  const container = document.getElementById("horrorContainer");
+  const w = window.innerWidth - 100;
+  const h = window.innerHeight - 100;
+
+  for (let i = 0; i < 30; i++) {
+
+    const div = document.createElement("div");
+    div.className = "horror-text";
+
+    div.textContent =
+      messages[Math.floor(Math.random() * messages.length)];
+
+    div.style.left = Math.random() * w + "px";
+    div.style.top = Math.random() * h + "px";
+
+    container.appendChild(div);
+  }}
+
+  if (click == 140) {
+    title.textContent = "◆";
+    
+  }
+
+  
+
+  if (click == 150) {
+    title.textContent = "死死死死死死死死死死死";
+    speech.textContent = "死死死死死死死死死死死死死死";
+    reset.textContent = "戻れない";
+    reset.onclick = null;
+  
+  }
+
+  // 170
+  if (click == 160) {
+    clickSound.src = "gucha.mp3";
+
+  }
+
+  // 200
+  if (click == 180) {
+    btn.classList.add("glitch");
+  }
+
+  // 250
+  if (click == 200) {
+    game.classList.add("glitch");
+    document.body.style.backgroundImage = 'url("si.jfif")';
+  }
+  if (click == 220) {
+   document.body.style.filter = "contrast(150%) brightness(0.8)";
+   document.body.style.animation = "shake 0.1s infinite";
+   }
+
+  if (click == 250) {
+
+  for (let i = 0; i < 30; i++) {
+
+    const ghost = document.createElement("div");
+    ghost.textContent = "痛い";
+    ghost.style.position = "absolute";
+    ghost.style.left = Math.random() * window.innerWidth + "px";
+    ghost.style.top = Math.random() * window.innerHeight + "px";
+    ghost.style.color = "red";
+
+    document.body.appendChild(ghost);
+
+     }
+     }
+
+     if (click == 220) {
+      document.body.style.filter = "contrast(120%) brightness(0.8)";
+      document.body.style.transform = "translateX(2px)";
+
+     game.classList.add("glitch");
+     }
+
+     if (click == 300) {
+      document.body.style.opacity = "0";
+     setTimeout(() => {
+      document.body.style.opacity = "1";
+     }, 200);
+
+  // たまに揺れる
+    setInterval(() => {
+      document.body.style.transform =
+      `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
+     }, 100);
+
+     }
+
+     if (click == 400) {
+
+     bgm.playbackRate = 0.7;
+
+     title.textContent = "■■■■■■";
+     speech.textContent = "■■■";
+
+  // 背景破壊
+      document.body.style.background = "black";
+
+  // 画面ノイズっぽく
+     document.body.style.filter = "contrast(200%) blur(1px)";
+
+  // 全UI少しずつ消す
+     btn.style.opacity = "0.5";
+     count.style.opacity = "0.3";
+     }
+
+     if (click == 500) {
+
+  bgm.pause();
+  clickSound.pause();
+  specialSound.pause();
+
+  document.body.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src = "owari.jfif";
+
+  img.style.width = "100vw";
+  img.style.height = "100vh";
+  img.style.objectFit = "cover";
+
+  document.body.appendChild(img);
+
+  document.body.onclick = null;
+
+  document.title = "■■■■■■";
+
+  
+}
+
+
+};
+
+
+// リセット
+reset.onclick = () => {
+
+  const ok = confirm("本当によろしいですか？");
+
+  if (ok) {
+   
+    location.reload();
+  }
+};
+
+</script>
+</body>
+</html>
